@@ -107,6 +107,7 @@ class CandidatureController extends Controller
         );
 
         // 7) Emails de soumission (non bloquants)
+        
         try {
             $this->emailService->sendSubmissionConfirmation($candidature, (string) $candidature->student_email);
 
