@@ -2,6 +2,11 @@
 
 return [
 
+
+
+     'front_url' => env('FRONT_URL', 'http://localhost:3000'),
+     'back_url'  => env('BACK_URL', env('APP_URL', 'http://localhost')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
