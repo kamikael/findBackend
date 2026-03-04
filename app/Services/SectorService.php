@@ -9,11 +9,13 @@ class SectorService
 {
     public function __construct(
         protected SectorRepository $sectorRepository
+        
     ) {}
-
+    
     public function getAll()
     {
         return $this->sectorRepository->all();
+
     }
 
    public function getAvailable()
@@ -87,4 +89,6 @@ class SectorService
             throw new Exception('Sector not found.');
         }
     }
+
+    
 }
