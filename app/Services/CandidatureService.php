@@ -67,6 +67,7 @@ class CandidatureService
             ) {
                 throw new Exception('Missing required partner information for Licence level (binôme).');
             }
+            
         } elseif ($level === 'Master') {
             // Candidature individuelle : pas de partenaire
             if (

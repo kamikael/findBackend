@@ -130,6 +130,7 @@ public function confirmPaymentById(string $paymentId): ?Payment
     }
 
     return $payment;
+    
 }
     /**
      * Optionnel : si un jour tu veux confirmer via transaction_id FedaPay.
