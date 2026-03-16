@@ -14,6 +14,8 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => bcrypt('password'),
+                'role' => User::ROLE_ADMIN,
+                'status' => 'active',
             ]
         );
     }

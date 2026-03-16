@@ -7,7 +7,10 @@
 ## 3 
    # php artisan migrate
 ## 4 
-   # php artisan db:seed         
+   # php artisan db:seed  
+
+   
+          
 
 
 

@@ -9,9 +9,15 @@ return new class extends Migration {
     {
         Schema::connection('mongodb')->create('sectors', function (Blueprint $collection) {
             $collection->index('name');
+            $collection->index('domain_id');
+            $collection->index('status');
+            $collection->index('level');
 
             $collection->string('name');
             $collection->text('description')->nullable();
+            $collection->string('domain_id');
+            $collection->string('status')->default('available');
+            $collection->string('level')->default('license');
             $collection->integer('total_slots')->default(0);
             $collection->integer('available_slots')->default(0);
 

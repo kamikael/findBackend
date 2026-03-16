@@ -7,6 +7,10 @@
         Secteurs
     </x-nav-link>
 
+    <x-nav-link :href="route('admin.domains.index')" :active="request()->routeIs('admin.domains.*')">
+        Domaines
+    </x-nav-link>
+
     <x-nav-link :href="route('admin.candidatures.index')" :active="request()->routeIs('admin.candidatures.*')">
         Candidatures
     </x-nav-link>

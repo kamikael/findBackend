@@ -2,24 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Models\Candidature;
+use App\Models\Domain;
+use App\Models\MobileMoneyProvider;
+use App\Models\Payment;
+use App\Models\Sector;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Models\Sector;
-use App\Models\Candidature;
-use App\Models\Payment;
-use App\Models\MobileMoneyProvider;
 
 class MongoFakeDataSeeder extends Seeder
 {
     public function run(): void
     {
-        // Nettoyage (optionnel, pratique en dev)
-        MobileMoneyProvider::query()->delete();
-        Sector::query()->delete();
-        Candidature::query()->delete();
         Payment::query()->delete();
+        Candidature::query()->delete();
+        Sector::query()->delete();
+        Domain::query()->delete();
+        MobileMoneyProvider::query()->delete();
 
-        // 1) Providers (Mongo)
         $mtn = MobileMoneyProvider::create([
             'name' => 'MTN',
             'code' => 'mtn_open',
@@ -35,6 +35,7 @@ class MongoFakeDataSeeder extends Seeder
             'is_active' => true,
             'api_base_url' => null,
         ]);
+
         $celtis = MobileMoneyProvider::create([
             'name' => 'Celtis',
             'code' => 'celtis_open',
@@ -45,28 +46,57 @@ class MongoFakeDataSeeder extends Seeder
 
         $providers = collect([$mtn, $moov, $celtis]);
 
-        // 2) Sectors (Mongo)
+        $domains = collect([
+            ['name' => 'Informatique', 'description' => 'Métiers du numérique'],
+            ['name' => 'Comptabilité', 'description' => 'Finance, audit et gestion'],
+            ['name' => 'Droit', 'description' => 'Affaires juridiques et conformité'],
+        ])->mapWithKeys(function (array $domain) {
+            $created = Domain::create($domain);
+
+            return [$created->name => $created];
+        });
+
         $sectors = collect([
-            ['name' => 'Informatique', 'description' => 'Web / Mobile', 'total_slots' => 20],
-            ['name' => 'Réseaux & Sécurité', 'description' => 'Sysadmin / Cyber', 'total_slots' => 12],
-            ['name' => 'Finance', 'description' => 'Audit / Comptabilité', 'total_slots' => 15],
-        ])->map(function ($s) {
+            [
+                'name' => 'Développement Web',
+                'description' => 'Web / Mobile',
+                'domain_name' => 'Informatique',
+                'level' => 'license',
+                'total_slots' => 20,
+            ],
+            [
+                'name' => 'Réseaux & Sécurité',
+                'description' => 'Sysadmin / Cyber',
+                'domain_name' => 'Informatique',
+                'level' => 'master',
+                'total_slots' => 12,
+            ],
+            [
+                'name' => 'Fiscalité & Audit',
+                'description' => 'Audit / Comptabilité',
+                'domain_name' => 'Comptabilité',
+                'level' => 'license',
+                'total_slots' => 15,
+            ],
+        ])->map(function (array $sector) use ($domains) {
+            $domain = $domains->get($sector['domain_name']);
+
             return Sector::create([
-                'name' => $s['name'],
-                'description' => $s['description'],
-                'total_slots' => (int) $s['total_slots'],
-                'available_slots' => (int) $s['total_slots'],
+                'name' => $sector['name'],
+                'description' => $sector['description'],
+                'domain_id' => (string) $domain->_id,
+                'level' => $sector['level'],
+                'total_slots' => (int) $sector['total_slots'],
+                'available_slots' => (int) $sector['total_slots'],
             ]);
         });
 
-        // 3) Candidatures + Payments (Mongo) (liés)
         for ($i = 1; $i <= 10; $i++) {
             $sector = $sectors->random();
             $provider = $providers->random();
 
             $level = ($i % 2 === 0) ? 'Licence' : 'Master';
             $isLicence = $level === 'Licence';
-
             $status = ($i % 3 === 0) ? 'paid' : 'pending';
 
             $candidature = Candidature::create([
@@ -84,9 +114,9 @@ class MongoFakeDataSeeder extends Seeder
 
             $payment = Payment::create([
                 'candidature_id' => (string) $candidature->_id,
-                'provider_id'    => (string) $provider->_id,   // ✅ ICI
-                'amount'         => 5000,
-                'status'         => $status === 'paid' ? Payment::STATUS_PAID : Payment::STATUS_INITIATED,
+                'provider_id' => (string) $provider->_id,
+                'amount' => 5000,
+                'status' => $status === 'paid' ? Payment::STATUS_PAID : Payment::STATUS_INITIATED,
                 'transaction_id' => (string) Str::uuid(),
                 'reference_transaction' => null,
             ]);
@@ -94,7 +124,6 @@ class MongoFakeDataSeeder extends Seeder
             $candidature->payment_id = (string) $payment->_id;
             $candidature->save();
 
-            // décrémenter places si "paid"
             if ($status === 'paid') {
                 $requiredSlots = $level === 'Licence' ? 2 : 1;
                 $sector->available_slots = max(0, (int) $sector->available_slots - $requiredSlots);

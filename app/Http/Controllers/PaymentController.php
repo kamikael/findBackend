@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Candidature;
 use App\Models\Payment;
+use App\Services\EmailService;
 use App\Services\PaymentService;
 use FedaPay\Event;
 use FedaPay\FedaPay;
@@ -12,7 +14,8 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller
 {
     public function __construct(
-        protected PaymentService $paymentService
+        protected PaymentService $paymentService,
+        protected EmailService $emailService
     ) {}
 
     public function callback(Request $request)
@@ -62,7 +65,16 @@ class PaymentController extends Controller
         }
 
         try {
-            $this->paymentService->confirmPaymentById($paiementId);
+            $confirmedPayment = $this->paymentService->confirmPaymentById($paiementId);
+
+            if ($confirmedPayment) {
+                $candidature = Candidature::find((string) $confirmedPayment->candidature_id);
+
+                if ($candidature) {
+                    $this->emailService->sendAdminPaymentNotification($candidature);
+                }
+            }
+
             return response()->json(['status' => 'success']);
         } catch (\Throwable $e) {
             Log::error('Erreur traitement webhook', [

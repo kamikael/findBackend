@@ -8,7 +8,7 @@ class SectorRepository
 {
     public function all()
     {
-        return Sector::orderBy('created_at', 'desc')->get();
+        return Sector::with('domain')->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -16,14 +16,15 @@ class SectorRepository
      */
     public function available()
     {
-        return Sector::where('available_slots', '>', 0)
+        return Sector::with('domain')
+            ->where('available_slots', '>', 0)
             ->orderBy('available_slots', 'desc')
             ->get();
     }
 
     public function find(string $id): ?Sector
     {
-        return Sector::find($id);
+        return Sector::with('domain')->find($id);
     }
 
     public function create(array $data): Sector
@@ -71,6 +72,14 @@ class SectorRepository
         $updated = Sector::where('_id', $sectorId)
             ->where('available_slots', '>=', $count)
             ->decrement('available_slots', $count);
+
+        if ($updated > 0) {
+            $sector = Sector::find($sectorId);
+
+            if ($sector) {
+                $sector->save();
+            }
+        }
 
         return $updated > 0;
     }

@@ -116,8 +116,6 @@ public function confirmPaymentById(string $paymentId): ?Payment
 
     // 6️⃣ Emails (protégés)
     try {
-        $this->emailService->sendAdminPaymentNotification($candidature);
-
         $this->emailService->sendConfirmation($candidature->student_email);
 
         if (!empty($candidature->partner_email)) {
@@ -145,7 +143,13 @@ public function confirmPaymentById(string $paymentId): ?Payment
         return $this->confirmPaymentById((string) $payment->_id);
     }
 
-    public function createCheckout(Payment $paiement, string $customerEmail, string $phoneNumber): string
+    public function createCheckout(
+        Payment $paiement,
+        string $customerEmail,
+        string $phoneNumber,
+        string $customerFirstname,
+        string $customerLastname
+    ): string
     {
         
         \Log::info('FedaPay config debug', [
@@ -180,6 +184,8 @@ $mode = $provider->code;
                 'callback_url' => $callbackUrl,
                 'mode'         => $mode,
                 'customer'     => [
+                    'firstname' => $customerFirstname,
+                    'lastname' => $customerLastname,
                     'email' => $customerEmail,
                     'phone_number' => [
                         'country' => 'bj',

@@ -6,6 +6,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminSectorController;
 use App\Http\Controllers\Admin\AdminCandidatureController;
+use App\Http\Controllers\Admin\AdminDomainController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminProviderController;
 use Illuminate\Support\Facades\Mail;
@@ -19,7 +20,7 @@ Route::get('/fedapay/redirect', [PaymentController::class, 'redirectFromFedaPay'
 
 
 // Admin (Breeze Blade)
-Route::middleware(['auth'])
+Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -33,6 +34,12 @@ Route::middleware(['auth'])
         Route::put('/sectors/{id}', [AdminSectorController::class, 'update'])->name('sectors.update');
         Route::delete('/sectors/{id}', [AdminSectorController::class, 'destroy'])->name('sectors.destroy');
         Route::post('/sectors/{id}/reset-slots', [AdminSectorController::class, 'resetSlots'])->name('sectors.resetSlots');
+
+        // Domaines
+        Route::get('/domains', [AdminDomainController::class, 'index'])->name('domains.index');
+        Route::post('/domains', [AdminDomainController::class, 'store'])->name('domains.store');
+        Route::put('/domains/{id}', [AdminDomainController::class, 'update'])->name('domains.update');
+        Route::delete('/domains/{id}', [AdminDomainController::class, 'destroy'])->name('domains.destroy');
 
         // Candidatures
         Route::get('/candidatures', [AdminCandidatureController::class, 'index'])->name('candidatures.index');

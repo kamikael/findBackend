@@ -26,12 +26,16 @@ class CandidatureController extends Controller
             'sector_id' => 'required|string',
             'level' => 'required|in:Licence,Master',
             'student_name' => 'required|string',
+            'student_firstname' => 'required|string',
+            'student_lastname' => 'required|string',
             'student_email' => 'required|email',
             'amount' => 'required|numeric|min:0',
             'provider_id' => 'required|string',
 
             // Binome (Licence)
             'partner_name' => 'nullable|string',
+            'partner_firstname' => 'nullable|string',
+            'partner_lastname' => 'nullable|string',
             'partner_email' => 'nullable|email',
 
             // Fichiers
@@ -43,8 +47,13 @@ class CandidatureController extends Controller
 
         // 2) Regles niveau
         if ($validated['level'] === 'Licence') {
-            if (empty($validated['partner_name']) || empty($validated['partner_email'])) {
-                return response()->json(['message' => 'Binome requis pour Licence (partner_name, partner_email).'], 422);
+            if (
+                empty($validated['partner_name']) ||
+                empty($validated['partner_firstname']) ||
+                empty($validated['partner_lastname']) ||
+                empty($validated['partner_email'])
+            ) {
+                return response()->json(['message' => 'Binome requis pour Licence (partner_name, partner_firstname, partner_lastname, partner_email).'], 422);
             }
 
             if (!$request->hasFile('partner_cv')) {
@@ -52,7 +61,12 @@ class CandidatureController extends Controller
             }
         } else {
             // Master : pas de binome
-            if (!empty($validated['partner_name']) || !empty($validated['partner_email'])) {
+            if (
+                !empty($validated['partner_name']) ||
+                !empty($validated['partner_firstname']) ||
+                !empty($validated['partner_lastname']) ||
+                !empty($validated['partner_email'])
+            ) {
                 return response()->json(['message' => 'Master doit etre individuel (pas de binome).'], 422);
             }
         }
@@ -74,9 +88,13 @@ class CandidatureController extends Controller
             'sector_id' => $validated['sector_id'],
             'level' => $validated['level'],
             'student_name' => $validated['student_name'],
+            'student_firstname' => $validated['student_firstname'],
+            'student_lastname' => $validated['student_lastname'],
             'student_email' => $validated['student_email'],
             'student_cv_url' => $studentCvUrl,
             'partner_name' => $validated['level'] === 'Licence' ? $validated['partner_name'] : null,
+            'partner_firstname' => $validated['level'] === 'Licence' ? $validated['partner_firstname'] : null,
+            'partner_lastname' => $validated['level'] === 'Licence' ? $validated['partner_lastname'] : null,
             'partner_email' => $validated['level'] === 'Licence' ? $validated['partner_email'] : null,
             'partner_cv_url' => $validated['level'] === 'Licence' ? $partnerCvUrl : null,
             // status sera mis par service (pending / pending_payment)
@@ -103,7 +121,9 @@ class CandidatureController extends Controller
         $checkoutUrl = $this->paymentService->createCheckout(
             $payment,
             $candidature->student_email,
-            $validated['phone_number']
+            $validated['phone_number'],
+            $validated['student_firstname'],
+            $validated['student_lastname']
         );
 
         // 7) Emails de soumission (non bloquants)
@@ -115,7 +135,6 @@ class CandidatureController extends Controller
                 $this->emailService->sendSubmissionConfirmation($candidature, (string) $candidature->partner_email);
             }
 
-            $this->emailService->sendAdminSubmissionNotification($candidature);
         } catch (\Throwable $e) {
             Log::warning('Candidature enregistree mais email de soumission echoue', [
                 'candidature_id' => (string) $candidature->_id,

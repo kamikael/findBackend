@@ -60,6 +60,8 @@ class CandidatureService
         if ($level === 'Licence') {
             if (
                 empty($data['partner_name']) ||
+                empty($data['partner_firstname']) ||
+                empty($data['partner_lastname']) ||
                 empty($data['partner_email']) ||
                 empty($data['partner_cv_url'])
             ) {
@@ -69,6 +71,8 @@ class CandidatureService
             // Candidature individuelle : pas de partenaire
             if (
                 !empty($data['partner_name']) ||
+                !empty($data['partner_firstname']) ||
+                !empty($data['partner_lastname']) ||
                 !empty($data['partner_email']) ||
                 !empty($data['partner_cv_url'])
             ) {
