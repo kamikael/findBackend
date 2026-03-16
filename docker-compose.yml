@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - .env
+    environment:
+      PORT: 8000
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    command: sh -c "php artisan serve --host=0.0.0.0 --port=$${PORT}"
+    networks:
+      - laravel
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  mongo_data:
