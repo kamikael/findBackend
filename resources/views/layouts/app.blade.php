@@ -7,7 +7,7 @@
         
     <link rel="icon" type="image/svg+xml" href="/logo1.png" />
 
-        <title>#Find</title>
+        <title>#Find-administration</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
