@@ -1,47 +1,31 @@
 FROM php:8.2-cli
 
+COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
-    libcurl4-openssl-dev \
-    libzip-dev \
     libsqlite3-dev \
-    libicu-dev \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
-    pkg-config \
-    libssl-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
+    && install-php-extensions \
         bcmath \
         curl \
         gd \
         intl \
         mbstring \
+        mongodb \
         pdo_sqlite \
         zip \
-    && docker-php-ext-install \
-        dom \
-        simplexml \
-        xml \
-        xmlreader \
-        xmlwriter \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+RUN php -m | grep -E "gd|mongodb" \
+    && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 RUN mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && touch database/database.sqlite \
