@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         mbstring \
-        mongodb \
+        mongodb-1.21.3 \
         pdo_sqlite \
         simplexml \
         xml \
