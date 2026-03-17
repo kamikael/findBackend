@@ -48,7 +48,7 @@ RUN install-php-extensions \
 
 # ── MongoDB via PECL ──────────────────────────────────────────────────────────
 RUN pecl channel-update pecl.php.net \
-    && pecl install mongodb-1.21.3 \
+    && pecl install mongodb \
     && docker-php-ext-enable mongodb
 
 # ── Vérification des extensions critiques ────────────────────────────────────
