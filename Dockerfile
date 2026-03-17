@@ -8,6 +8,15 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     libsqlite3-dev \
+    pkg-config \
+    libssl-dev \
+    libzip-dev \
+    libicu-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libxml2-dev \
+    libonig-dev \
     && install-php-extensions \
         bcmath \
         curl \
@@ -24,8 +33,9 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN php -m | grep -E "gd|mongodb" \
-    && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+RUN php --ri gd
+RUN php --ri mongodb
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 RUN mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && touch database/database.sqlite \
