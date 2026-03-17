@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
+    autoconf \
+    g++ \
+    make \
     libsqlite3-dev \
     pkg-config \
     libssl-dev \
@@ -17,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libxml2-dev \
     libonig-dev \
+    zlib1g-dev \
     && install-php-extensions \
         bcmath \
         curl \
@@ -30,6 +34,7 @@ RUN apt-get update && apt-get install -y \
         xmlreader \
         xmlwriter \
         zip \
+    && pecl channel-update pecl.php.net \
     && pecl install mongodb-1.21.3 \
     && docker-php-ext-enable mongodb \
     && apt-get clean \
