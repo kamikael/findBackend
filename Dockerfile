@@ -24,13 +24,14 @@ RUN apt-get update && apt-get install -y \
         gd \
         intl \
         mbstring \
-        mongodb-1.21.3 \
         pdo_sqlite \
         simplexml \
         xml \
         xmlreader \
         xmlwriter \
         zip \
+    && pecl install mongodb-1.21.3 \
+    && docker-php-ext-enable mongodb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
