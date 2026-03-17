@@ -20,11 +20,16 @@ RUN apt-get update && apt-get install -y \
     && install-php-extensions \
         bcmath \
         curl \
+        dom \
         gd \
         intl \
         mbstring \
         mongodb \
         pdo_sqlite \
+        simplexml \
+        xml \
+        xmlreader \
+        xmlwriter \
         zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -37,7 +42,7 @@ RUN php --ri gd
 RUN php --ri mongodb
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
+RUN composer install -vvv --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 
 RUN mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && touch database/database.sqlite \
