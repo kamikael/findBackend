@@ -35,7 +35,9 @@ COPY . .
 
 RUN php --ri gd
 RUN php --ri mongodb
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 
 RUN mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && touch database/database.sqlite \
@@ -43,4 +45,4 @@ RUN mkdir -p database storage/framework/cache storage/framework/sessions storage
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "php artisan config:clear && php artisan route:clear && php artisan view:clear && (php artisan storage:link || true) && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+CMD ["sh", "-c", "php artisan package:discover --ansi && php artisan config:clear && php artisan route:clear && php artisan view:clear && (php artisan storage:link || true) && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
